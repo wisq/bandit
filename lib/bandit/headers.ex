@@ -107,11 +107,15 @@ defmodule Bandit.Headers do
   @spec add_content_length(Plug.Conn.headers(), non_neg_integer(), Plug.Conn.int_status()) ::
           Plug.Conn.headers()
   def add_content_length(headers, length, status) do
-    headers = Enum.reject(headers, &(elem(&1, 0) == "content-length"))
+    case Enum.split_with(headers, &(elem(&1, 0) == "content-length")) do
+      {[content_length], rest} ->
+        [content_length | rest]
 
-    if add_content_length?(status),
-      do: [{"content-length", to_string(length)} | headers],
-      else: headers
+      {[], _} ->
+        if add_content_length?(status),
+          do: [{"content-length", to_string(length)} | headers],
+          else: headers
+    end
   end
 
   # Per RFC9110§8.6
