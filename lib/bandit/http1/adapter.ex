@@ -77,15 +77,7 @@ defmodule Bandit.HTTP1.Adapter do
          {:ok, body_size} <- Bandit.Headers.get_content_length(headers) do
       body_encoding = Bandit.Headers.get_header(headers, "transfer-encoding")
 
-      content_encoding =
-        Bandit.Compression.negotiate_content_encoding(
-          Bandit.Headers.get_header(headers, "accept-encoding"),
-          Keyword.get(req.opts.http_1, :compress, true)
-        )
-
-      connection = Bandit.Headers.get_header(headers, "connection")
-      keepalive = should_keepalive?(req.version, connection)
-      req = %{req | content_encoding: content_encoding, keepalive: keepalive}
+      req = %{req | content_encoding: nil, keepalive: false}
 
       case {body_size, body_encoding} do
         {nil, nil} ->
